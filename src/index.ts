@@ -119,7 +119,7 @@ Powered by OpenClaw AI agents specializing in oil and gas operations.
 });
 
 // Error handler
-app.error((error) => {
+app.error(async (error) => {
   console.error('Slack Bolt error:', error);
 });
 
