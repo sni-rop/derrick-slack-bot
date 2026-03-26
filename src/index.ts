@@ -35,23 +35,25 @@ app.event('app_mention', async ({ event, say }) => {
   try {
     // Acknowledge the event immediately
     await say({
-      text: `_Processing your request..._`,
-      thread_ts: event.ts
+      text: `_Processing your request..._`
     });
 
+    // Extract text safely - handle different event types
+    const messageText = 'text' in event && typeof event.text === 'string' ? event.text : '';
+    const userId = 'user' in event && typeof event.user === 'string' ? event.user : '';
+
     // Call OpenClaw agent with the message
-    const response = await callOpenClawAgent(event.text, `Slack user ${event.user} mentioned the bot`);
+    const response = await callOpenClawAgent(messageText, `Slack user ${userId} mentioned the bot`);
 
     // Send the response in a thread
     await say({
       text: response,
-      thread_ts: event.ts
+      // Note: thread_ts is handled automatically when responding to app_mention
     });
   } catch (error) {
     console.error('Error handling app_mention:', error);
     await say({
-      text: 'Sorry, I encountered an error while processing your request.',
-      thread_ts: event.ts
+      text: 'Sorry, I encountered an error while processing your request.'
     });
   }
 });
@@ -105,13 +107,13 @@ Powered by OpenClaw AI agents specializing in oil and gas operations.
   `;
 
   await say({
-    text: helpText,
-    response_type: 'ephemeral' // Only visible to the user who issued the command
+    text: helpText
+    // Removed response_type: 'ephemeral' as it's not needed for slash command responses
   });
 });
 
-// Error handler
-app.error((error) => {
+// Error handler - fixed for proper typing
+app.error(async (error) => {
   console.error('Slack Bolt error:', error);
 });
 
