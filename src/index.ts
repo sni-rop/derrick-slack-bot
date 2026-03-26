@@ -67,12 +67,17 @@ app.event('app_mention', async ({ event, say, payload }) => {
     
     console.log('Response sent successfully to Slack');
     console.log('=== END APP_MENTION EVENT ===');
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error handling app_mention:', error);
+    // Safely access error properties
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    const errorCode = error instanceof Error && 'code' in error ? (error as Error & {code?: string}).code : undefined;
+    const errorName = error instanceof Error && 'name' in error ? (error as Error & {name?: string}).name : undefined;
+    
     console.error('Error details:', {
-      message: error.message,
-      code: 'code' in error ? error.code : 'undefined',
-      name: 'name' in error ? error.name : 'undefined'
+      message: errorMessage,
+      code: errorCode,
+      name: errorName
     });
     await say({
       text: 'Sorry, I encountered an error while processing your request.'
@@ -119,12 +124,17 @@ app.message(async ({ message, say, payload }) => {
     
     console.log('Direct message response sent successfully');
     console.log('=== END DIRECT MESSAGE ===');
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error handling direct message:', error);
+    // Safely access error properties
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    const errorCode = error instanceof Error && 'code' in error ? (error as Error & {code?: string}).code : undefined;
+    const errorName = error instanceof Error && 'name' in error ? (error as Error & {name?: string}).name : undefined;
+    
     console.error('Error details:', {
-      message: error.message,
-      code: 'code' in error ? error.code : 'undefined',
-      name: 'name' in error ? error.name : 'undefined'
+      message: errorMessage,
+      code: errorCode,
+      name: errorName
     });
     await say({
       text: 'Sorry, I encountered an error while processing your request.'
@@ -159,16 +169,21 @@ Powered by OpenClaw AI agents specializing in oil and gas operations.
 });
 
 // Error handler
-app.error(async (error) => {
+app.error(async (error: unknown) => {
   console.error('=== SLACK BOLT ERROR ===');
   console.error('Slack Bolt error:', error);
+  // Safely access error properties
+  const errorMessage = error instanceof Error ? error.message : String(error);
+  const errorCode = error instanceof Error && 'code' in error ? (error as Error & {code?: string}).code : undefined;
+  const errorName = error instanceof Error && 'name' in error ? (error as Error & {name?: string}).name : undefined;
+  
   console.error('Error details:', {
-    message: error.message,
-    code: 'code' in error ? error.code : 'undefined',
-    name: 'name' in error ? error.name : 'undefined'
+    message: errorMessage,
+    code: errorCode,
+    name: errorName
   });
   // Log the error stack trace for debugging
-  console.error('Error stack:', error.stack);
+  console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace available');
   console.error('=== END SLACK BOLT ERROR ===');
 });
 
