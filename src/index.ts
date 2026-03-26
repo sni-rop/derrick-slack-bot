@@ -33,12 +33,15 @@ async function callOpenClawAgent(message: string, context: string = ''): Promise
 
 // Listen for app_mentions (when someone mentions @yourbot)
 ////// RAILWAY DEPLOYMENT TEST - IF YOU SEE THIS COMMENT, THE FIX IS ACTIVE //////
-app.event('app_mention', async ({ event, say }) => {
+app.event('app_mention', async ({ event, say, payload }) => {
   try {
-    console.log('Received app_mention event:', { 
-      user: 'user' in event && typeof event.user === 'string' ? event.user : 'unknown',
-      text: 'text' in event && typeof event.text === 'string' ? event.text.substring(0, 50) + '...' : 'no text'
-    });
+    // Log the raw payload for debugging
+    console.log('=== APP_MENTION EVENT RECEIVED ===');
+    console.log('Event type:', event.type);
+    console.log('User ID:', 'user' in event && typeof event.user === 'string' ? event.user : 'MISSING');
+    console.log('Event text:', 'text' in event && typeof event.text === 'string' ? event.text.substring(0, 100) + (event.text.length > 100 ? '...' : '') : 'MISSING');
+    console.log('Full event object:', JSON.stringify(event, null, 2));
+    console.log('Payload:', JSON.stringify(payload, null, 2));
 
     // Acknowledge the event immediately
     await say({
@@ -63,8 +66,14 @@ app.event('app_mention', async ({ event, say }) => {
     });
     
     console.log('Response sent successfully to Slack');
+    console.log('=== END APP_MENTION EVENT ===');
   } catch (error) {
     console.error('Error handling app_mention:', error);
+    console.error('Error details:', {
+      message: error.message,
+      code: 'code' in error ? error.code : 'undefined',
+      name: 'name' in error ? error.name : 'undefined'
+    });
     await say({
       text: 'Sorry, I encountered an error while processing your request.'
     });
@@ -72,13 +81,21 @@ app.event('app_mention', async ({ event, say }) => {
 });
 
 // Listen for direct messages
-app.message(async ({ message, say }) => {
+app.message(async ({ message, say, payload }) => {
   // Ignore messages from bots to prevent loops
   if (message.subtype && message.subtype === 'bot_message') {
     return;
   }
 
   try {
+    // Log the raw message and payload for debugging
+    console.log('=== DIRECT MESSAGE RECEIVED ===');
+    console.log('Message subtype:', message.subtype);
+    console.log('Message text:', 'text' in message && typeof message.text === 'string' ? message.text : 'MISSING');
+    console.log('Message user:', 'user' in message && typeof message.user === 'string' ? message.user : 'MISSING');
+    console.log('Message object:', JSON.stringify(message, null, 2));
+    console.log('Payload:', JSON.stringify(payload, null, 2));
+
     // Acknowledge immediately
     await say({
       text: `_Processing your request..._`
@@ -88,10 +105,7 @@ app.message(async ({ message, say }) => {
     const messageText = 'text' in message && typeof message.text === 'string' ? message.text : '';
     const userId = 'user' in message && typeof message.user === 'string' ? message.user : '';
 
-    console.log('Received direct message:', { 
-      user: userId,
-      text: messageText.substring(0, 50) + (messageText.length > 50 ? '...' : '')
-    });
+    console.log('Processing message from user:', userId, '| Text length:', messageText.length);
 
     // Call OpenClaw agent
     const response = await callOpenClawAgent(messageText, `Direct message from Slack user ${userId}`);
@@ -104,8 +118,14 @@ app.message(async ({ message, say }) => {
     });
     
     console.log('Direct message response sent successfully');
+    console.log('=== END DIRECT MESSAGE ===');
   } catch (error) {
     console.error('Error handling direct message:', error);
+    console.error('Error details:', {
+      message: error.message,
+      code: 'code' in error ? error.code : 'undefined',
+      name: 'name' in error ? error.name : 'undefined'
+    });
     await say({
       text: 'Sorry, I encountered an error while processing your request.'
     });
@@ -140,12 +160,16 @@ Powered by OpenClaw AI agents specializing in oil and gas operations.
 
 // Error handler
 app.error(async (error) => {
+  console.error('=== SLACK BOLT ERROR ===');
   console.error('Slack Bolt error:', error);
   console.error('Error details:', {
     message: error.message,
-    code: 'code' in error ? error.code : 'no code',
-    name: 'name' in error ? error.name : 'no name'
+    code: 'code' in error ? error.code : 'undefined',
+    name: 'name' in error ? error.name : 'undefined'
   });
+  // Log the error stack trace for debugging
+  console.error('Error stack:', error.stack);
+  console.error('=== END SLACK BOLT ERROR ===');
 });
 
 // Start the app
