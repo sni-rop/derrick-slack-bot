@@ -47,7 +47,7 @@ app.event('app_mention', async ({ event, say }) => {
 
     // Send the response in a thread
     await say({
-      text: response,
+      text: response
       // Note: thread_ts is handled automatically when responding to app_mention
     });
   } catch (error) {
