@@ -32,6 +32,7 @@ async function callOpenClawAgent(message: string, context: string = ''): Promise
 }
 
 // Listen for app_mentions (when someone mentions @yourbot)
+////// RAILWAY DEPLOYMENT TEST - IF YOU SEE THIS COMMENT, THE FIX IS ACTIVE //////
 app.event('app_mention', async ({ event, say }) => {
   try {
     // Acknowledge the event immediately
