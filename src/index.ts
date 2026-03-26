@@ -15,6 +15,7 @@ const app = new App({
 const OPENACLAW_API_URL = process.env.OPENACLAW_API_URL || 'http://localhost:3000';
 
 // Helper function to call OpenClaw API
+// FIXED: Properly handle Slack event types to avoid TS errors
 async function callOpenClawAgent(message: string, context: string = ''): Promise<string> {
   try {
     const response = await axios.post(`${OPENACLAW_API_URL}/agent/query`, {

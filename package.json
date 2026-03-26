@@ -2,7 +2,7 @@
   "name": "derrick-slack-bot",
   "version": "1.0.0",
   "description": "A Slack bot for interacting with OpenClaw AI agents",
-  "main": "src/index.ts",
+  "main": "src/index.js",
   "scripts": {
     "start": "node dist/index.js",
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
