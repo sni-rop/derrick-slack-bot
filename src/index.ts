@@ -72,8 +72,12 @@ app.message(async ({ message, say }) => {
       text: `_Processing your request..._`
     });
 
+    // Extract text and user ID safely
+    const messageText = 'text' in message && typeof message.text === 'string' ? message.text : '';
+    const userId = 'user' in message && typeof message.user === 'string' ? message.user : '';
+
     // Call OpenClaw agent
-    const response = await callOpenClawAgent(message.text, `Direct message from Slack user ${message.user}`);
+    const response = await callOpenClawAgent(messageText, `Direct message from Slack user ${userId}`);
 
     // Send the response
     await say({
@@ -113,8 +117,8 @@ Powered by OpenClaw AI agents specializing in oil and gas operations.
   });
 });
 
-// Error handler - fixed for proper typing
-app.error(async (error) => {
+// Error handler
+app.error((error) => {
   console.error('Slack Bolt error:', error);
 });
 
