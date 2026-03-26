@@ -35,6 +35,11 @@ async function callOpenClawAgent(message: string, context: string = ''): Promise
 ////// RAILWAY DEPLOYMENT TEST - IF YOU SEE THIS COMMENT, THE FIX IS ACTIVE //////
 app.event('app_mention', async ({ event, say }) => {
   try {
+    console.log('Received app_mention event:', { 
+      user: 'user' in event && typeof event.user === 'string' ? event.user : 'unknown',
+      text: 'text' in event && typeof event.text === 'string' ? event.text.substring(0, 50) + '...' : 'no text'
+    });
+
     // Acknowledge the event immediately
     await say({
       text: `_Processing your request..._`
@@ -44,14 +49,20 @@ app.event('app_mention', async ({ event, say }) => {
     const messageText = 'text' in event && typeof event.text === 'string' ? event.text : '';
     const userId = 'user' in event && typeof event.user === 'string' ? event.user : '';
 
+    console.log('Processing message from user:', userId, '| Text length:', messageText.length);
+
     // Call OpenClaw agent with the message
     const response = await callOpenClawAgent(messageText, `Slack user ${userId} mentioned the bot`);
+
+    console.log('Received response from OpenClaw, sending to Slack');
 
     // Send the response in a thread
     await say({
       text: response
       // Note: thread_ts is handled automatically when responding to app_mention
     });
+    
+    console.log('Response sent successfully to Slack');
   } catch (error) {
     console.error('Error handling app_mention:', error);
     await say({
@@ -77,13 +88,22 @@ app.message(async ({ message, say }) => {
     const messageText = 'text' in message && typeof message.text === 'string' ? message.text : '';
     const userId = 'user' in message && typeof message.user === 'string' ? message.user : '';
 
+    console.log('Received direct message:', { 
+      user: userId,
+      text: messageText.substring(0, 50) + (messageText.length > 50 ? '...' : '')
+    });
+
     // Call OpenClaw agent
     const response = await callOpenClawAgent(messageText, `Direct message from Slack user ${userId}`);
+
+    console.log('Received response from OpenClaw, sending to Slack');
 
     // Send the response
     await say({
       text: response
     });
+    
+    console.log('Direct message response sent successfully');
   } catch (error) {
     console.error('Error handling direct message:', error);
     await say({
@@ -121,6 +141,11 @@ Powered by OpenClaw AI agents specializing in oil and gas operations.
 // Error handler
 app.error(async (error) => {
   console.error('Slack Bolt error:', error);
+  console.error('Error details:', {
+    message: error.message,
+    code: 'code' in error ? error.code : 'no code',
+    name: 'name' in error ? error.name : 'no name'
+  });
 });
 
 // Start the app
